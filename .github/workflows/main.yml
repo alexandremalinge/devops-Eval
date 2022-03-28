@@ -29,21 +29,19 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - run: 
+      - run: |
           docker build . -t devopseval.azurecr.io/run:${{ github.sha }}
           docker push devopseval.azurecr.io/run:${{ github.sha }}
           
-  deploy:
-    needs: build
-    
-    runs-on: ubuntu-latest
-    
-    steps:
-     
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+  delploy:
+    
+    runs-on: ubuntu-latest
+    
+    steps:
       - name: 'Deploy to Azure Container Instances'
         uses: 'azure/aci-deploy@v1'
         with:
@@ -56,17 +54,16 @@ jobs:
           name: devopseval
           location: 'francecentral'
           
-  cypress-run:
-    
-    needs: deploy
+  Test:
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress run
-        uses: cypress-io/github-action@v2
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
         with:
-          build: npm run build
-          start: npm start
+          node-version: '16.x'
+      - run: npm install
+      - run: npm run build --if-present
+      - run: npm test
