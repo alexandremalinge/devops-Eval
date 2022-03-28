@@ -29,7 +29,7 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - run: |
+      - run: 
           docker build . -t devopseval.azurecr.io/run:${{ github.sha }}
           docker push devopseval.azurecr.io/run:${{ github.sha }}
           
